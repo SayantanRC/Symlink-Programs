@@ -1,0 +1,19 @@
+# All directories not present here will be linked directly under $HOME.
+# But say we want to have a directory "icons" under ".config" then we specify
+# it as:
+# .icons : $HOME/.config/icons
+# The script will create ".config" directory under $HOME if it does not exist,
+# then create the symlink under it.
+#
+# Spaces in directory names are allowed.
+# Spaces around : are not compulsory or fixed.
+# Blank lines or lines starting with # are ignored.
+
+# Example for Android studio
+#android-studio.desktop : $HOME/.local/share/applications/android-studio.desktop
+#local share Google : $HOME/.local/share/Google
+#local share kotlin : $HOME/.local/share/kotlin
+#local share Android Open Source Project : $HOME/.local/share/Android Open Source Project
+#config Google : $HOME/.config/Google
+#config Android Open Source Project : $HOME/.config/Android Open Source Project    
+#cache Google : $HOME/.cache/Google
