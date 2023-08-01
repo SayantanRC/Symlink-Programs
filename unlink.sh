@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # Run this script to remove all the symlinks created by setup.sh.
 
@@ -17,6 +17,20 @@ else
   echo "Install / script location not found / invalid: $SCRIPT_DIR. Exiting."
   exit
 fi
+
+doUnlink() {
+  link="$1"
+  dirName="$2"
+  
+  if [[ ! -e $link ]]; then
+    echo "⚠️⚠️ Does not exist: $link"
+  elif [[ $(readlink -f "${link}") == "${SCRIPT_DIR}/${dirName}" ]]; then
+    echo "✅✅ Removing link: \"$link\""
+    rm "${link}"
+  else
+    echo "❗❗❗ Not removed, file related to something else: $link"
+  fi
+}
 
 # Array basics: https://siytek.com/bash-arrays/
 declare -A CustomDirs
@@ -45,20 +59,17 @@ then
     
     # Split string: https://stackoverflow.com/a/5257398/10967630
     IFS=':'; lineArr=($line); unset IFS;
-    dirName=$(echo ${lineArr[0]})
+    dirName=$(eval echo ${lineArr[0]})
     link="$(eval echo ${lineArr[1]})"
     CustomDirs[$dirName]="$link"
-
-    if [[ ! -e $link ]]
+    
+    if [[ $link == "IGNORE" ]]
     then
-      echo "!!!!!! Does not exist: $link"
-    elif [[ $(readlink -f "${link}") == "${SCRIPT_DIR}/${dirName}" ]]
-    then
-      echo "Removing link: \"$link\""
-      rm "${link}"
-    else
-      echo "!!!!!! Not removed: $link"
+      echo "Ignoring de-linking \"$dirName\""
+      continue
     fi
+
+    doUnlink "$link" "$dirName"
 
   done < $CUSTOM_LIST
 
@@ -79,18 +90,7 @@ while read -r line ; do
   # Link only directories which are not linked above
   if [[ -z "${CustomDirs[$dirName]}" && $dirName != $SCRIPT_NAME && $dirName != $CUSTOM_LIST  && $dirName != "setup.sh" ]]
   then
-
-    if [[ ! -e $link ]]
-    then
-      echo "!!!!!! Does not exist: $link"
-    elif [[ $(readlink -f "${link}") == "${SCRIPT_DIR}/${dirName}" ]]
-    then
-      echo "Removing link: \"$link\""
-      rm "${link}"
-    else
-      echo "!!!!!! Not removed: $link"
-    fi
-
+    doUnlink "$link" "$dirName"
   fi
 done <<< $(ls -A -1)
 
